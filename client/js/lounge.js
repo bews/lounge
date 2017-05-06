@@ -301,6 +301,8 @@ $(function() {
 		var chan = chat.find(target);
 		var template = "msg";
 
+		data.msg.seconds = options.seconds;
+
 		if (!data.msg.highlight && !data.msg.self && (type === "message" || type === "notice") && options.highlights.some(function(h) {
 			return data.msg.text.toLocaleLowerCase().indexOf(h.toLocaleLowerCase()) > -1;
 		})) {
