@@ -901,12 +901,7 @@ kbd {
 
 #chat .time {
 	color: #ddd;
-	text-align: right;
-	width: 46px;
-}
-
-#chat .time.seconds {
-	width: 66px;
+	padding-left: 10px;
 }
 
 #chat .from {
