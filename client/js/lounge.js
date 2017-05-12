@@ -28,6 +28,8 @@ $(function() {
 
 	var ignoreSortSync = false;
 
+	var currentHistoryLength = 0;
+
 	var pop;
 	try {
 		pop = new Audio();
@@ -608,8 +610,11 @@ $(function() {
 	socket.on("part", function(data) {
 		var chanMenuItem = sidebar.find(".chan[data-id='" + data.chan + "']");
 
-		// When parting from the active channel/query, jump to the network's lobby
-		if (chanMenuItem.hasClass("active")) {
+		// When parting from the active channel/query, jump to the previous channel or to the network's lobby
+		if (currentHistoryLength > 0) {
+			currentHistoryLength--;
+			history.back();
+		} else if (chanMenuItem.hasClass("active")) {
 			chanMenuItem.parent(".network").find(".lobby").click();
 		}
 
@@ -997,6 +1002,7 @@ $(function() {
 				history.replaceState(state, null, null);
 			} else {
 				history.pushState(state, null, null);
+				currentHistoryLength++;
 			}
 		}
 	});
@@ -1115,6 +1121,15 @@ $(function() {
 			opacity: 0.4
 		});
 		return false;
+	});
+
+	chat.on("click", "button.close", function() {
+		var id = $(this)
+			.closest(".chan")
+			.data("id");
+		sidebar.find(".chan[data-id='" + id + "']")
+			.find(".close")
+			.click();
 	});
 
 	contextMenu.on("click", ".context-menu-item", function() {
