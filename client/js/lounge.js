@@ -409,9 +409,10 @@ $(function() {
 
 		if (data.type !== "lobby") {
 			var lastDate;
-			$(chat.find("#chan-" + data.id + " .messages .msg[data-time]")).each(function() {
-				var msg = $(this);
-				var msgDate = new Date(msg.attr("data-time"));
+			$(data.messages).each(function() {
+				var msgData = this;
+				var msgDate = new Date(msgData.time);
+				var msg = $(chat.find("#chan-" + data.id + " .messages #msg-" + msgData.id));
 
 				// Top-most message in a channel
 				if (!lastDate) {
@@ -424,6 +425,8 @@ $(function() {
 				}
 
 				lastDate = msgDate;
+
+				updateDisconnectedUsers(channel, msgData);
 			});
 		}
 	}
@@ -488,6 +491,18 @@ $(function() {
 		}
 	}
 
+	function updateDisconnectedUsers(channel, message) {
+		switch (message.type) {
+		case "join":
+			channel.find(".msg .user[data-name='" + message.from + "']").removeClass("disconnected");
+			break;
+		case "part":
+		case "quit":
+			channel.find(".msg .user[data-name='" + message.from + "']").addClass("disconnected");
+			break;
+		}
+	}
+
 	socket.on("msg", function(data) {
 		var msg = buildChatMessage(data);
 		var target = "#chan-" + data.chan;
@@ -498,7 +513,7 @@ $(function() {
 			$(container).empty();
 		}
 
-        // Check if date changed
+		// Check if date changed
 		var prevMsg = $(container.find(".msg")).last();
 		var prevMsgTime = new Date(prevMsg.attr("data-time"));
 		var msgTime = new Date(msg.attr("data-time"));
@@ -512,6 +527,7 @@ $(function() {
 			prevMsg.after(templates.date_marker({msgDate: msgTime}));
 		}
 
+		// Add message to the container
 		if (chat.find(target).is(".active") && container.children().last().is(".unread-marker")) {
 			stopUnreadMarker = true;
 		}
@@ -529,6 +545,8 @@ $(function() {
 				.find(".unread-marker")
 				.appendTo(container);
 		}
+
+		updateDisconnectedUsers(container, data.msg);
 	});
 
 	socket.on("more", function(data) {
@@ -569,6 +587,7 @@ $(function() {
 			var msgData = this;
 			var msgDate = new Date(msgData.time);
 			var msg = $(chat.find("#chan-" + data.chan + " .messages #msg-" + msgData.id));
+			var nicks = chat.find("#chan-" + data.chan + " .users").data("nicks");
 
 			// Top-most message in a channel
 			if (!lastDate) {
@@ -581,6 +600,10 @@ $(function() {
 			}
 
 			lastDate = msgDate;
+
+			if (nicks.indexOf(msgData.from) === -1) {
+				chan.find(".msg .user[data-name='" + msgData.from + "']").addClass("disconnected");
+			}
 		});
 
 		scrollable.find(".show-more-button").prop("disabled", false).data("scroll", position).removeClass("hide");
