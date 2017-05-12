@@ -28,6 +28,8 @@ $(function() {
 
 	var ignoreSortSync = false;
 
+	var currentHistoryLength = 0;
+
 	var pop;
 	try {
 		pop = new Audio();
@@ -294,8 +296,15 @@ $(function() {
 	function buildChatMessage(data) {
 		var type = data.msg.type;
 		var target = "#chan-" + data.chan;
-		if (type === "error") {
+		switch (type) {
+		case "error":
 			target = "#chan-" + chat.find(".active").data("id");
+			break;
+		case "toggle":
+			if (data.msg.toggle && ((data.msg.toggle.type === "link" && options.links) || (data.msg.toggle.type === "image" && options.thumbnails))) {
+				data.msg.toggle.show = true;
+			}
+			break;
 		}
 
 		var chan = chat.find(target);
@@ -321,7 +330,7 @@ $(function() {
 			"whois",
 			"ctcp",
 			"channel_list",
-			"ban_list",
+			"ban_list"
 		].indexOf(type) !== -1) {
 			template = "msg_action";
 		} else if (type === "unhandled") {
@@ -332,12 +341,26 @@ $(function() {
 		var text = msg.find(".text");
 
 		if (template === "msg_action") {
+			if (data.msg.invited !== undefined) {
+				data.msg.target = data.msg.invited;
+			} else if (data.msg.new_nick !== undefined) {
+				data.msg.target = data.msg.new_nick;
+			} else if (data.msg.whois !== undefined) {
+				data.msg.target = data.msg.whois.nick;
+			}
+
 			text.html(templates.actions[type](data.msg));
 		}
 
 		if ((type === "message" || type === "action") && chan.hasClass("channel")) {
 			var nicks = chan.find(".users").data("nicks");
 			if (nicks) {
+				nicks.forEach(function(nick) {
+					if (data.msg.text.indexOf(nick) > -1) {
+						var re = new RegExp("(^|[ <])" + nick + "([.,: >]{1})", "g");
+						text.html(text.html().replace(re, "$1" + templates.user_name({nick: nick}).trim() + "$2"));
+					}
+				});
 				var find = nicks.indexOf(data.msg.from);
 				if (find !== -1) {
 					nicks.splice(find, 1);
@@ -360,11 +383,11 @@ $(function() {
 	}
 
 	function renderChannel(data) {
-		renderChannelMessages(data);
-
 		if (data.type === "channel") {
 			renderChannelUsers(data);
 		}
+
+		renderChannelMessages(data);
 	}
 
 	function renderChannelMessages(data) {
@@ -469,6 +492,7 @@ $(function() {
 		var msg = buildChatMessage(data);
 		var target = "#chan-" + data.chan;
 		var container = chat.find(target + " .messages");
+		var stopUnreadMarker = false;
 
 		if (data.msg.type === "channel_list" || data.msg.type === "ban_list") {
 			$(container).empty();
@@ -488,7 +512,11 @@ $(function() {
 			prevMsg.after(templates.date_marker({msgDate: msgTime}));
 		}
 
-        // Add message to the container
+		if (chat.find(target).is(".active") && container.children().last().is(".unread-marker")) {
+			stopUnreadMarker = true;
+		}
+
+		// Add message to the container
 		container
 			.append(msg)
 			.trigger("msg", [
@@ -496,7 +524,7 @@ $(function() {
 				data
 			]);
 
-		if (data.msg.self) {
+		if (data.msg.self || stopUnreadMarker) {
 			container
 				.find(".unread-marker")
 				.appendTo(container);
@@ -555,7 +583,7 @@ $(function() {
 			lastDate = msgDate;
 		});
 
-		scrollable.find(".show-more-button").prop("disabled", false);
+		scrollable.find(".show-more-button").prop("disabled", false).data("scroll", position).removeClass("hide");
 	});
 
 	socket.on("network", function(data) {
@@ -587,8 +615,11 @@ $(function() {
 	socket.on("part", function(data) {
 		var chanMenuItem = sidebar.find(".chan[data-id='" + data.chan + "']");
 
-		// When parting from the active channel/query, jump to the network's lobby
-		if (chanMenuItem.hasClass("active")) {
+		// When parting from the active channel/query, jump to the previous channel or to the network's lobby
+		if (currentHistoryLength > 0) {
+			currentHistoryLength--;
+			history.back();
+		} else if (chanMenuItem.hasClass("active")) {
 			chanMenuItem.parent(".network").find(".lobby").click();
 		}
 
@@ -610,7 +641,7 @@ $(function() {
 	});
 
 	socket.on("toggle", function(data) {
-		var toggle = $("#toggle-" + data.id);
+		var toggle = $(".channel .toggle .toggle-button[data-openid='" + data.id + "']");
 		toggle.parent().after(templates.toggle({toggle: data}));
 		switch (data.type) {
 		case "link":
@@ -665,6 +696,15 @@ $(function() {
 		}
 	});
 
+	viewport.on("click", "#expand_preview, .toggle-content img", function() {
+		var self = $(this);
+		var container = $("#expand_preview");
+		if (self.is("img")) {
+			container.html(templates.toggle_expand({link: self.attr("src")}));
+		}
+		container.toggleClass("display");
+	});
+
 	viewport.on("click", ".rt", function(e) {
 		var self = $(this);
 		viewport.toggleClass(self.attr("class"));
@@ -707,6 +747,11 @@ $(function() {
 				text: target.text(),
 				data: target.data("name")
 			});
+			output += templates.contextmenu_item({
+				class: "user-color",
+				text: "Change color",
+				data: target.data("name")
+			});
 		} else if (target.hasClass("chan")) {
 			output = templates.contextmenu_item({
 				class: "chan",
@@ -719,6 +764,12 @@ $(function() {
 				text: target.hasClass("lobby") ? "Disconnect" : target.hasClass("channel") ? "Leave" : "Close",
 				data: target.data("target")
 			});
+		} else if (target.hasClass("toggle-content")) {
+			output = templates.contextmenu_item({
+				class: "hide-pref",
+				text: "Hide",
+				data: target.data("id")
+			});
 		}
 
 		contextMenuContainer.show();
@@ -729,7 +780,7 @@ $(function() {
 		return false;
 	}
 
-	viewport.on("contextmenu", ".user, .network .chan", function(e) {
+	viewport.on("contextmenu", ".user, .network .chan, .toggle-content", function(e) {
 		return showContextMenu(this, e);
 	});
 
@@ -961,6 +1012,7 @@ $(function() {
 				history.replaceState(state, null, null);
 			} else {
 				history.pushState(state, null, null);
+				currentHistoryLength++;
 			}
 		}
 	});
@@ -1029,7 +1081,7 @@ $(function() {
 			setNick(self.closest(".network").data("nick"));
 		}
 
-		var chanChat = chan.find(".chat");
+		var chanChat = chan.find(".chat").off("scroll");
 		if (chanChat.length > 0 && chan.data("type") !== "special") {
 			chanChat.sticky();
 		}
@@ -1040,6 +1092,19 @@ $(function() {
 		}
 
 		focus();
+
+		chanChat.on("scroll", function() {
+			var button = $(this).find(".show-more.show .show-more-button");
+			if ($(this).scrollTop() < 50 && $(this).find(".msg").length >= 100) {
+				if (!button.data("loading")) {
+					button.data("scroll", false).data("loading", true).click();
+				} else if (button.data("scroll")) {
+					$(this).scrollTop(button.data("scroll"));
+				}
+			} else if(button.data("loading")) {
+				button.data("loading", false);
+			}
+		});
 	});
 
 	sidebar.on("click", "#sign-out", function() {
@@ -1068,6 +1133,15 @@ $(function() {
 		return false;
 	});
 
+	chat.on("click", "button.close", function() {
+		var id = $(this)
+			.closest(".chan")
+			.data("id");
+		sidebar.find(".chan[data-id='" + id + "']")
+			.find(".close")
+			.click();
+	});
+
 	contextMenu.on("click", ".context-menu-item", function() {
 		switch ($(this).data("action")) {
 		case "close":
@@ -1078,6 +1152,9 @@ $(function() {
 			break;
 		case "user":
 			$(".channel.active .users .user[data-name='" + $(this).data("data") + "']").click();
+			break;
+		case "hide-pref":
+			$(".channel.active .toggle .toggle-button[data-openid='" + $(this).data("data") + "']").click();
 			break;
 		}
 	});
@@ -1184,7 +1261,7 @@ $(function() {
 	chat.on("click", ".show-more-button", function() {
 		var self = $(this);
 		var count = self.parent().next(".messages").children(".msg").length;
-		self.prop("disabled", true);
+		self.prop("disabled", true).addClass("hide");
 		socket.emit("more", {
 			target: self.data("id"),
 			count: count
@@ -1196,7 +1273,7 @@ $(function() {
 		var localChat = self.closest(".chat");
 		var bottom = localChat.isScrollBottom();
 		var content = self.parent().next(".toggle-content");
-		if (bottom && !content.hasClass("show")) {
+		if (bottom && content.hasClass("hide")) {
 			var img = content.find("img");
 			if (img.length !== 0 && !img.width()) {
 				img.on("load", function() {
@@ -1204,7 +1281,10 @@ $(function() {
 				});
 			}
 		}
-		content.toggleClass("show");
+		if (content.length !== 0 && ((content.hasClass("toggle-type-link") && options.links) || (!content.hasClass("toggle-type-link") && options.thumbnails))) {
+			self.toggleClass("hide");
+		}
+		content.toggleClass("hide");
 		if (bottom) {
 			localChat.scrollBottom();
 		}
