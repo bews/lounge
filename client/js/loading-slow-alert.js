@@ -15,3 +15,7 @@ setTimeout(function() {
 		element.style.display = "block";
 	}
 }, 5000);
+
+document.getElementById("loading-slow-reload").onclick = function() {
+	location.reload();
+};
