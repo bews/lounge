@@ -19,6 +19,7 @@ const options = $.extend({
 	notifyAllMessages: false,
 	part: true,
 	quit: true,
+	showSeconds: false,
 	theme: $("#theme").attr("href").replace(/^themes\/(.*).css$/, "$1"), // Extracts default theme name, set on the server configuration
 	thumbnails: true,
 	userStyles: userStyles.text(),
