@@ -1101,7 +1101,7 @@ $(function() {
 				} else if (button.data("scroll")) {
 					$(this).scrollTop(button.data("scroll"));
 				}
-			} else if(button.data("loading")) {
+			} else if (button.data("loading")) {
 				button.data("loading", false);
 			}
 		});
