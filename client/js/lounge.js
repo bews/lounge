@@ -321,7 +321,7 @@ $(function() {
 			"whois",
 			"ctcp",
 			"channel_list",
-			"ban_list",
+			"ban_list"
 		].indexOf(type) !== -1) {
 			template = "msg_action";
 		} else if (type === "unhandled") {
@@ -332,12 +332,26 @@ $(function() {
 		var text = msg.find(".text");
 
 		if (template === "msg_action") {
+			if (data.msg.invited !== undefined) {
+				data.msg.target = data.msg.invited;
+			} else if (data.msg.new_nick !== undefined) {
+				data.msg.target = data.msg.new_nick;
+			} else if (data.msg.whois !== undefined) {
+				data.msg.target = data.msg.whois.nick;
+			}
+
 			text.html(templates.actions[type](data.msg));
 		}
 
 		if ((type === "message" || type === "action") && chan.hasClass("channel")) {
 			var nicks = chan.find(".users").data("nicks");
 			if (nicks) {
+				nicks.forEach(function(nick) {
+					if (data.msg.text.indexOf(nick) > -1) {
+						var re = new RegExp("(^| )" + nick.replace(/\[/, "\\[").replace(/]/, "\\]") + "([.,: ]{1})", "g");
+						text.html(text.html().replace(re, "$1" + templates.user_name({nick: nick}).trim() + "$2"));
+					}
+				});
 				var find = nicks.indexOf(data.msg.from);
 				if (find !== -1) {
 					nicks.splice(find, 1);
@@ -360,11 +374,11 @@ $(function() {
 	}
 
 	function renderChannel(data) {
-		renderChannelMessages(data);
-
 		if (data.type === "channel") {
 			renderChannelUsers(data);
 		}
+
+		renderChannelMessages(data);
 	}
 
 	function renderChannelMessages(data) {

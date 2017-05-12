@@ -22,7 +22,8 @@ const options = $.extend({
 	theme: $("#theme").attr("href").replace(/^themes\/(.*).css$/, "$1"), // Extracts default theme name, set on the server configuration
 	thumbnails: true,
 	userStyles: userStyles.text(),
-	highlights: []
+	highlights: [],
+	userColors: []
 }, JSON.parse(storage.get("settings")));
 
 module.exports = options;
@@ -62,7 +63,7 @@ settings.on("change", "input, select, textarea", function() {
 		"nick",
 		"part",
 		"quit",
-		"notifyAllMessages",
+		"notifyAllMessages"
 	].indexOf(name) !== -1) {
 		chat.toggleClass("hide-" + name, !self.prop("checked"));
 	} else if (name === "coloredNicks") {
