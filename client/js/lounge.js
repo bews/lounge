@@ -1570,7 +1570,7 @@ $(function() {
 	setInterval(function() {
 		chat.find(".chan:not(.active)").each(function() {
 			var chan = $(this);
-			if (chan.find(".messages .msg").slice(0, -100).remove().length) {
+			if (chan.find(".messages > .msg").slice(0, -100).remove().length) {
 				chan.find(".show-more").addClass("show");
 
 				// Remove date-seperators that would otherwise be "stuck" at the top
