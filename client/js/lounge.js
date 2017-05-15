@@ -371,7 +371,7 @@ $(function() {
 				let savedMessages = lastChild.data("savedMessages") || [];
 				savedMessages.push(msg);
 				lastChild.data("savedMessages", savedMessages);
-				lastChild.children(".condensed-msg").text(condenseObj.condense(savedMessages));
+				lastChild.children(".condensed-msg").html(condenseObj.condense(savedMessages));
 			} else if (lastChild && $(lastChild).is(condensedTypesClasses)) {
 				var condensed = buildChatMessage({msg: {type: "condensed", time: htmlMessage.attr("data-time")}, chan: chan});
 				condensed.append(lastChild);
@@ -383,7 +383,7 @@ $(function() {
 				savedMessages.push(lastmsg);
 				condensed.data("savedMessages", savedMessages);
 				savedMessages = condensed.data("savedMessages");
-				condensed.children(".condensed-msg").text(condenseObj.condense(savedMessages));
+				condensed.children(".condensed-msg").html(condenseObj.condense(savedMessages));
 			} else {
 				htmlMessage.data("msg", msg);
 				container.append(htmlMessage);
@@ -1044,7 +1044,9 @@ $(function() {
 		e.stopPropagation();
 	});
 
-	chat.on("click", ".user", function() {
+	chat.on("click", ".user", function(e) {
+		e.stopPropagation();
+		
 		var name = $(this).data("name");
 		var chan = findCurrentNetworkChan(name);
 
