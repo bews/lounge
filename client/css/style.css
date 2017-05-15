@@ -1151,7 +1151,8 @@ kbd {
 	color: #f00;
 }
 
-#chat .msg.toggle .time {
+#chat .msg.toggle .time,
+#chat .msg.condensed > .time {
 	visibility: hidden;
 }
 
