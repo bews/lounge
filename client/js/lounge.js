@@ -584,7 +584,6 @@ $(function() {
 			var msgData = this;
 			var msgDate = new Date(msgData.time);
 			var msg = $(chat.find("#chan-" + data.chan + " .messages #msg-" + msgData.id));
-			var nicks = chat.find("#chan-" + data.chan + " .users").data("nicks");
 
 			// Top-most message in a channel
 			if (!lastDate) {
