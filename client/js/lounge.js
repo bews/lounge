@@ -21,6 +21,7 @@ const templates = require("../views");
 const socket = require("./socket");
 const constants = require("./constants");
 const storage = require("./localStorage");
+const condenseObj = require("./condense");
 
 $(function() {
 	var sidebar = $("#sidebar, #footer");
@@ -307,25 +308,13 @@ $(function() {
 			data.msg.highlight = true;
 		}
 
-		if ([
-			"invite",
-			"join",
-			"mode",
-			"kick",
-			"nick",
-			"part",
-			"quit",
-			"topic",
-			"topic_set_by",
-			"action",
-			"whois",
-			"ctcp",
-			"channel_list",
-			"ban_list",
-		].indexOf(type) !== -1) {
+		if (constants.handledTypes.indexOf(type) !== -1) {
+			data.msg.template = "actions/" + type;
 			template = "msg_action";
 		} else if (type === "unhandled") {
 			template = "msg_unhandled";
+		} else if (type === "condensed") {
+			template = "msg_condensed";
 		}
 
 		var msg = $(templates[template](data.msg));
@@ -349,13 +338,59 @@ $(function() {
 		return msg;
 	}
 
-	function buildChannelMessages(channel, messages) {
-		return messages.reduce(function(docFragment, message) {
-			docFragment.append(buildChatMessage({
-				chan: channel,
-				msg: message
-			}));
-			return docFragment;
+	function appendMessage(input) {
+		var container = input.container || undefined;
+		var chan = input.chan || undefined;
+		var chanType = input.type || undefined;
+		var htmlMessage = input.htmlMessage || "";
+		var msg = input.msg || undefined;
+		var messageType = msg.type;
+
+		if (constants.condensedTypes.indexOf(messageType) !== -1 && chanType !== "lobby") {
+			var condensedTypesClasses = "." + constants.condensedTypes.join(", .");
+			var lastChild = container.children("div.msg").last();
+			var lastDate = (new Date(lastChild.attr("data-time"))).toDateString();
+			var msgDate = (new Date(htmlMessage.attr("data-time"))).toDateString();
+			if (lastChild && $(lastChild).hasClass("condensed") && !$(htmlMessage).hasClass("message") && lastDate === msgDate) {
+				lastChild.append(htmlMessage);
+				let savedMessages = lastChild.data("savedMessages") || [];
+				savedMessages.push(msg);
+				lastChild.data("savedMessages", savedMessages);
+				lastChild.children(".condensed-msg").text(condenseObj.condense(savedMessages));
+			} else if (lastChild && $(lastChild).is(condensedTypesClasses)) {
+				var condensed = buildChatMessage({msg: {type: "condensed", time: htmlMessage.attr("data-time")}, chan: chan});
+				condensed.append(lastChild);
+				condensed.append(htmlMessage);
+				container.append(condensed);
+				let lastmsg = lastChild.data("msg");
+				let savedMessages = condensed.data("savedMessages") || [];
+				savedMessages.push(msg);
+				savedMessages.push(lastmsg);
+				condensed.data("savedMessages", savedMessages);
+				savedMessages = condensed.data("savedMessages");
+				condensed.children(".condensed-msg").text(condenseObj.condense(savedMessages));
+			} else {
+				htmlMessage.data("msg", msg);
+				container.append(htmlMessage);
+			}
+		} else {
+			container.append(htmlMessage);
+		}
+	}
+
+	function buildChannelMessages(data) {
+		return data.messages.reduce(function(container, message) {
+			appendMessage({
+				container: container,
+				chan: data.id,
+				msg: message,
+				type: message.type,
+				htmlMessage: buildChatMessage({
+					chan: data.id,
+					msg: message
+				}),
+			});
+			return container;
 		}, $(document.createDocumentFragment()));
 	}
 
@@ -368,7 +403,7 @@ $(function() {
 	}
 
 	function renderChannelMessages(data) {
-		var documentFragment = buildChannelMessages(data.id, data.messages);
+		var documentFragment = buildChannelMessages(data);
 		var channel = chat.find("#chan-" + data.id + " .messages").append(documentFragment);
 
 		if (data.firstUnread > 0) {
@@ -377,6 +412,8 @@ $(function() {
 			// TODO: If the message is far off in the history, we still need to append the marker into DOM
 			if (!first.length) {
 				channel.prepend(templates.unread_marker());
+			} else if (first.parent().hasClass("condensed")) {
+				first.parent().before(templates.unread_marker());
 			} else {
 				first.before(templates.unread_marker());
 			}
@@ -397,6 +434,10 @@ $(function() {
 				}
 
 				if (lastDate.toDateString() !== msgDate.toDateString()) {
+					var parent = msg.parent();
+					if (parent.hasClass("condensed")) {
+						msg.insertAfter(parent);
+					}
 					msg.before(templates.date_marker({msgDate: msgDate}));
 				}
 
@@ -485,16 +526,25 @@ $(function() {
 		}
 
 		if (prevMsgTime.toDateString() !== msgTime.toDateString()) {
+			var parent = prevMsg.parent();
+			if (parent.hasClass("condensed")) {
+				prevMsg = parent;
+			}
 			prevMsg.after(templates.date_marker({msgDate: msgTime}));
 		}
 
-        // Add message to the container
-		container
-			.append(msg)
-			.trigger("msg", [
-				target,
-				data
-			]);
+		appendMessage({
+			container: container,
+			chan: data.chan,
+			msg: data.msg,
+			htmlMessage: msg,
+			type: $(target).attr("data-type"),
+		});
+
+		container.trigger("msg", [
+			target,
+			data
+		]);
 
 		if (data.msg.self) {
 			container
@@ -504,7 +554,7 @@ $(function() {
 	});
 
 	socket.on("more", function(data) {
-		var documentFragment = buildChannelMessages(data.chan, data.messages);
+		var documentFragment = buildChannelMessages(data);
 		var chan = chat
 			.find("#chan-" + data.chan)
 			.find(".messages");
@@ -518,9 +568,11 @@ $(function() {
 		var children = $(chan).children();
 		if (children.eq(0).hasClass("date-marker-container")) { // Check top most child
 			children.eq(0).remove();
-		} else if (children.eq(1).hasClass("date-marker-container")) {
+		} else if (children.eq(0).hasClass("unread-marker") && children.eq(1).hasClass("date-marker")) {
 			// The unread-marker could be at index 0, which will cause the date-marker to become "stuck"
 			children.eq(1).remove();
+		} else if (children.eq(0).hasClass("condensed") && children.eq(0).children(".date-marker").eq(0).hasClass("date-marker")) {
+			children.eq(0).children(".date-marker").eq(0).remove();
 		}
 
 		// Add the older messages
@@ -549,6 +601,10 @@ $(function() {
 			}
 
 			if (lastDate.toDateString() !== msgDate.toDateString()) {
+				var parent = msg.parent();
+				if (parent.hasClass("condensed")) {
+					msg.insertAfter(parent);
+				}
 				msg.before(templates.date_marker({msgDate: msgDate}));
 			}
 
@@ -920,6 +976,14 @@ $(function() {
 		}
 	});
 
+	chat.on("click", ".condensed", function() {
+		$(this).toggleClass("closed");
+	});
+
+	chat.on("click", ".condensed div", function(e) {
+		e.stopPropagation();
+	});
+
 	chat.on("click", ".user", function() {
 		var name = $(this).data("name");
 		var chan = findCurrentNetworkChan(name);
@@ -1183,11 +1247,15 @@ $(function() {
 
 	chat.on("click", ".show-more-button", function() {
 		var self = $(this);
-		var count = self.parent().next(".messages").children(".msg").length;
+		var lastMessage = self.parent().next(".messages").children(".msg").first();
+		if (lastMessage.is(".condensed")) {
+			lastMessage = lastMessage.children(".msg").first();
+		}
+		var lastMessageId = lastMessage[0].id;
 		self.prop("disabled", true);
 		socket.emit("more", {
 			target: self.data("id"),
-			count: count
+			lastId: lastMessageId
 		});
 	});
 
