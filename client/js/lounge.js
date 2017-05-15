@@ -361,7 +361,7 @@ $(function() {
 		var msg = input.msg || undefined;
 		var messageType = msg.type;
 
-		if (constants.condensedTypes.indexOf(messageType) !== -1 && chanType !== "lobby") {
+		if (options.useCondensed && constants.condensedTypes.indexOf(messageType) !== -1 && chanType !== "lobby") {
 			var condensedTypesClasses = "." + constants.condensedTypes.join(", .");
 			var lastChild = container.children("div.msg").last();
 			var lastDate = (new Date(lastChild.attr("data-time"))).toDateString();
