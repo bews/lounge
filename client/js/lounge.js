@@ -387,10 +387,9 @@ $(function() {
 				container.append(condensed);
 				let lastmsg = lastChild.data("msg");
 				let savedMessages = condensed.data("savedMessages") || [];
-				savedMessages.push(msg);
 				savedMessages.push(lastmsg);
+				savedMessages.push(msg);
 				condensed.data("savedMessages", savedMessages);
-				savedMessages = condensed.data("savedMessages");
 				condensed.children(".condensed-msg").html(condenseObj.condense(savedMessages));
 				if (nicks) {
 					condensed.children(".condensed-msg").find(".user").each(function() {

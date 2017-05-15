@@ -291,7 +291,7 @@ let nickStrategy = {
 };
 
 let condense = {
-	strategy: [nickStrategy, modeStrategy, peekinStrategy, reconnectStrategy, joinedStrategy, partStrategy, quitStrategy],
+	strategy: [nickStrategy, modeStrategy, reconnectStrategy, peekinStrategy, joinedStrategy, partStrategy, quitStrategy],
 	condense: function(messages) {
 		let messageList = messages.slice(0); // clone input
 		let output = "";
