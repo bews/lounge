@@ -442,15 +442,19 @@ $(function() {
 				var msgData = this;
 				var msgDate = new Date(msgData.time);
 				var msg = $(chat.find("#chan-" + data.id + " .messages #msg-" + msgData.id));
+				var parent = msg.parent();
 
 				// Top-most message in a channel
 				if (!lastDate) {
 					lastDate = msgDate;
-					msg.before(templates.date_marker({msgDate: msgDate}));
+					if (parent.hasClass("condensed")) {
+						parent.before(templates.date_marker({msgDate: msgDate}));
+					} else {
+						msg.before(templates.date_marker({msgDate: msgDate}));
+					}
 				}
 
 				if (lastDate.toDateString() !== msgDate.toDateString()) {
-					var parent = msg.parent();
 					if (parent.hasClass("condensed")) {
 						msg.insertAfter(parent);
 					}
@@ -559,7 +563,7 @@ $(function() {
 		if (prevMsgTime.toDateString() !== msgTime.toDateString()) {
 			var parent = prevMsg.parent();
 			if (parent.hasClass("condensed")) {
-				prevMsg = parent;
+				prevMsg = parent.prev();
 			}
 			prevMsg.after(templates.date_marker({msgDate: msgTime}));
 		}
@@ -605,11 +609,9 @@ $(function() {
 		var children = $(chan).children();
 		if (children.eq(0).hasClass("date-marker-container")) { // Check top most child
 			children.eq(0).remove();
-		} else if (children.eq(0).hasClass("unread-marker") && children.eq(1).hasClass("date-marker")) {
+		} else if (children.eq(1).hasClass("date-marker-container")) {
 			// The unread-marker could be at index 0, which will cause the date-marker to become "stuck"
 			children.eq(1).remove();
-		} else if (children.eq(0).hasClass("condensed") && children.eq(0).children(".date-marker").eq(0).hasClass("date-marker")) {
-			children.eq(0).children(".date-marker").eq(0).remove();
 		}
 
 		// Add the older messages
@@ -630,16 +632,21 @@ $(function() {
 			var msgData = this;
 			var msgDate = new Date(msgData.time);
 			var msg = $(chat.find("#chan-" + data.chan + " .messages #msg-" + msgData.id));
+			var parent = msg.parent();
 			var nicks = chat.find("#chan-" + data.chan + " .users").data("nicks");
 
 			// Top-most message in a channel
 			if (!lastDate) {
 				lastDate = msgDate;
-				msg.before(templates.date_marker({msgDate: msgDate}));
+				if (parent.hasClass("condensed")) {
+					parent.before(templates.date_marker({msgDate: msgDate}));
+				} else {
+					msg.before(templates.date_marker({msgDate: msgDate}));
+				}
+
 			}
 
 			if (lastDate.toDateString() !== msgDate.toDateString()) {
-				var parent = msg.parent();
 				if (parent.hasClass("condensed")) {
 					msg.insertAfter(parent);
 				}
