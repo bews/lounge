@@ -1017,6 +1017,11 @@ kbd {
 	color: #999;
 }
 
+#chat .user.disconnected,
+#chat.colored-nicks .user.disconnected {
+	color: #999;
+}
+
 #chat .text {
 	padding-left: 10px;
 	padding-right: 6px;

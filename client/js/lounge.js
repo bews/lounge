@@ -485,6 +485,10 @@ $(function() {
 
 	function updateDisconnectedUsers(channel, message) {
 		switch (message.type) {
+		case "nick":
+			channel.find(".msg .user[data-name='" + message.from + "']").addClass("disconnected");
+			channel.find(".msg .user[data-name='" + message.new_nick + "']").removeClass("disconnected");
+			break;
 		case "join":
 			channel.find(".msg .user[data-name='" + message.from + "']").removeClass("disconnected");
 			break;
@@ -575,6 +579,7 @@ $(function() {
 		// Date change detect
 		// Have to use data instaid of the documentFragment because it's being weird
 		var lastDate;
+		var nicks = chat.find("#chan-" + data.chan + " .users").data("nicks");
 		$(data.messages).each(function() {
 			var msgData = this;
 			var msgDate = new Date(msgData.time);
@@ -692,7 +697,15 @@ $(function() {
 		}
 	});
 
-	socket.on("names", renderChannelUsers);
+	socket.on("names", function(data) {
+		renderChannelUsers(data);
+
+		// Condensed actions support
+		var messages = chat.find("#chan-" + data.id).find(".messages");
+		data.users.forEach(function(user) {
+			messages.find(".user[data-name='" + user.name + "']").removeClass("disconnected");
+		});
+	});
 
 	var options = require("./options");
 
