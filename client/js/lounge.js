@@ -360,6 +360,7 @@ $(function() {
 		var htmlMessage = input.htmlMessage || "";
 		var msg = input.msg || undefined;
 		var messageType = msg.type;
+		var nicks = container.closest(".chan").find(".users").data("nicks");
 
 		if (options.useCondensed && constants.condensedTypes.indexOf(messageType) !== -1 && chanType !== "lobby") {
 			var condensedTypesClasses = "." + constants.condensedTypes.join(", .");
@@ -372,6 +373,13 @@ $(function() {
 				savedMessages.push(msg);
 				lastChild.data("savedMessages", savedMessages);
 				lastChild.children(".condensed-msg").html(condenseObj.condense(savedMessages));
+				if (nicks) {
+					lastChild.children(".condensed-msg").find(".user").each(function() {
+						if (nicks.indexOf($(this).data("name")) === -1) {
+							$(this).addClass("disconnected");
+						}
+					})
+				}
 			} else if (lastChild && $(lastChild).is(condensedTypesClasses)) {
 				var condensed = buildChatMessage({msg: {type: "condensed", time: htmlMessage.attr("data-time")}, chan: chan});
 				condensed.append(lastChild);
@@ -384,6 +392,13 @@ $(function() {
 				condensed.data("savedMessages", savedMessages);
 				savedMessages = condensed.data("savedMessages");
 				condensed.children(".condensed-msg").html(condenseObj.condense(savedMessages));
+				if (nicks) {
+					condensed.children(".condensed-msg").find(".user").each(function() {
+						if (nicks.indexOf($(this).data("name")) === -1) {
+							$(this).addClass("disconnected");
+						}
+					})
+				}
 			} else {
 				htmlMessage.data("msg", msg);
 				container.append(htmlMessage);
@@ -530,6 +545,10 @@ $(function() {
 
 	function updateDisconnectedUsers(channel, message) {
 		switch (message.type) {
+		case "nick":
+			channel.find(".msg .user[data-name='" + message.from + "']").addClass("disconnected");
+			channel.find(".msg .user[data-name='" + message.new_nick + "']").removeClass("disconnected");
+			break;
 		case "join":
 			channel.find(".msg .user[data-name='" + message.from + "']").removeClass("disconnected");
 			break;
@@ -628,12 +647,12 @@ $(function() {
 		// Date change detect
 		// Have to use data instaid of the documentFragment because it's being weird
 		var lastDate;
+		var nicks = chat.find("#chan-" + data.chan + " .users").data("nicks");
 		$(data.messages).each(function() {
 			var msgData = this;
 			var msgDate = new Date(msgData.time);
 			var msg = $(chat.find("#chan-" + data.chan + " .messages #msg-" + msgData.id));
 			var parent = msg.parent();
-			var nicks = chat.find("#chan-" + data.chan + " .users").data("nicks");
 
 			// Top-most message in a channel
 			if (!lastDate) {
@@ -754,7 +773,15 @@ $(function() {
 		}
 	});
 
-	socket.on("names", renderChannelUsers);
+	socket.on("names", function(data) {
+		renderChannelUsers(data);
+
+		// Condensed actions support
+		var messages = chat.find("#chan-" + data.id).find(".messages");
+		data.users.forEach(function(user) {
+			messages.find(".user[data-name='" + user.name + "']").removeClass("disconnected");
+		});
+	});
 
 	var options = require("./options");
 
