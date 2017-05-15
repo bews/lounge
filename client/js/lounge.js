@@ -1046,7 +1046,7 @@ $(function() {
 
 	chat.on("click", ".user", function(e) {
 		e.stopPropagation();
-		
+
 		var name = $(this).data("name");
 		var chan = findCurrentNetworkChan(name);
 
