@@ -378,7 +378,7 @@ $(function() {
 						if (nicks.indexOf($(this).data("name")) === -1) {
 							$(this).addClass("disconnected");
 						}
-					})
+					});
 				}
 			} else if (lastChild && $(lastChild).is(condensedTypesClasses)) {
 				var condensed = buildChatMessage({msg: {type: "condensed", time: htmlMessage.attr("data-time")}, chan: chan});
@@ -397,7 +397,7 @@ $(function() {
 						if (nicks.indexOf($(this).data("name")) === -1) {
 							$(this).addClass("disconnected");
 						}
-					})
+					});
 				}
 			} else {
 				htmlMessage.data("msg", msg);
@@ -662,7 +662,6 @@ $(function() {
 				} else {
 					msg.before(templates.date_marker({msgDate: msgDate}));
 				}
-
 			}
 
 			if (lastDate.toDateString() !== msgDate.toDateString()) {
