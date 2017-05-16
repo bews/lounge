@@ -380,7 +380,7 @@ $(function() {
 						}
 					});
 				}
-			} else if (lastChild && $(lastChild).is(condensedTypesClasses)) {
+			} else if (lastChild && $(lastChild).is(condensedTypesClasses) && lastDate === msgDate) {
 				var condensed = buildChatMessage({msg: {type: "condensed", time: htmlMessage.attr("data-time")}, chan: chan});
 				condensed.append(lastChild);
 				condensed.append(htmlMessage);
@@ -470,9 +470,10 @@ $(function() {
 
 				if (lastDate.toDateString() !== msgDate.toDateString()) {
 					if (parent.hasClass("condensed")) {
-						msg.insertAfter(parent);
+						parent.before(templates.date_marker({msgDate: msgDate}));
+					} else {
+						msg.before(templates.date_marker({msgDate: msgDate}));
 					}
-					msg.before(templates.date_marker({msgDate: msgDate}));
 				}
 
 				lastDate = msgDate;
@@ -665,9 +666,10 @@ $(function() {
 
 			if (lastDate.toDateString() !== msgDate.toDateString()) {
 				if (parent.hasClass("condensed")) {
-					msg.insertAfter(parent);
+					parent.before(templates.date_marker({msgDate: msgDate}));
+				} else {
+					msg.before(templates.date_marker({msgDate: msgDate}));
 				}
-				msg.before(templates.date_marker({msgDate: msgDate}));
 			}
 
 			lastDate = msgDate;
