@@ -1,8 +1,10 @@
 "use strict";
 const $ = require("jquery");
+const moment = require("moment");
 const settings = $("#settings");
 const userStyles = $("#user-specified-css");
 const storage = require("./localStorage");
+const constants = require("./constants");
 
 const windows = $("#windows");
 const chat = $("#chat");
@@ -63,7 +65,7 @@ settings.on("change", "input, select, textarea", function() {
 		"nick",
 		"part",
 		"quit",
-		"notifyAllMessages",
+		"notifyAllMessages"
 	].indexOf(name) !== -1) {
 		chat.toggleClass("hide-" + name, !self.prop("checked"));
 	} else if (name === "coloredNicks") {
@@ -80,6 +82,11 @@ settings.on("change", "input, select, textarea", function() {
 			// Ensure we don't have empty string in the list of highlights
 			// otherwise, users get notifications for everything
 			return h !== "";
+		});
+	} else if (name === "showSeconds") {
+		var format = options.showSeconds ? constants.timeFormats.msgWithSeconds : constants.timeFormats.msgDefault;
+		chat.find(".msg > .time").each(function() {
+			$(this).text(moment($(this).parent().data("time")).format(format));
 		});
 	}
 }).find("input")
