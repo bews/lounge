@@ -2063,7 +2063,8 @@ kbd {
 		display: block;
 	}
 
-	#chat .msg.toggle .time {
+	#chat .msg.toggle .time,
+	#chat .msg.condensed > .time {
 		display: none;
 	}
 }
