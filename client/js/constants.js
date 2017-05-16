@@ -54,6 +54,11 @@ const commands = [
 	"/whois"
 ];
 
+const timeFormats = {
+	msgDefault: "HH:mm",
+	msgWithSeconds: "HH:mm:ss"
+};
+
 var handledTypes = [
 	"ban_list",
 	"invite",
@@ -81,6 +86,7 @@ var condensedTypes = [
 module.exports = {
 	colorCodeMap: colorCodeMap,
 	commands,
+	timeFormats: timeFormats,
 	condensedTypes,
 	handledTypes
 };
