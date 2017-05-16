@@ -1,4 +1,4 @@
-{{> ../user_name nick=from}}
+{{> ../user_name nick=from disconnected="1"}}
 <i class="hostmask">({{hostmask}})</i>
 has quit
 {{#if text}}

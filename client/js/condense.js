@@ -26,13 +26,13 @@ let quitStrategy = {
 
 		if (count) {
 			if (count === 1) {
-				text += templates.user_name({nick: list[0]});
+				text += templates.user_name({nick: list[0], disconnected: true});
 			} else if (count > 1 && count <= maxnames) {
 				list.reverse();
 				let last = list.pop();
-				text += list.map(n => templates.user_name({nick: n}).trim()).join(", ") + " and " + templates.user_name({nick: last});
+				text += list.map(n => templates.user_name({nick: n, disconnected: true}).trim()).join(", ") + " and " + templates.user_name({nick: last, disconnected: true});
 			} else if (count > maxnames) {
-				text += list.map(n => templates.user_name({nick: n}).trim()).slice(0,maxnames).join(", ") + " and " + (count - maxnames) + " others";
+				text += list.map(n => templates.user_name({nick: n, disconnected: true}).trim()).slice(0,maxnames).join(", ") + " and " + (count - maxnames) + " others";
 			}
 			text += " quit";
 		}
@@ -64,13 +64,13 @@ let partStrategy = {
 
 		if (count) {
 			if (count === 1) {
-				text += templates.user_name({nick: list[0]});
+				text += templates.user_name({nick: list[0], disconnected: true});
 			} else if (count > 1 && count <= maxnames) {
 				list.reverse();
 				let last = list.pop();
-				text += list.map(n => templates.user_name({nick: n}).trim()).join(", ") + " and " + templates.user_name({nick: last});
+				text += list.map(n => templates.user_name({nick: n, disconnected: true}).trim()).join(", ") + " and " + templates.user_name({nick: last, disconnected: true});
 			} else if (count > maxnames) {
-				text += list.map(n => templates.user_name({nick: n}).trim()).slice(0,maxnames).join(", ") + " and " + (count - maxnames) + " others";
+				text += list.map(n => templates.user_name({nick: n, disconnected: true}).trim()).slice(0,maxnames).join(", ") + " and " + (count - maxnames) + " others";
 			}
 			text += " leaved";
 		}
@@ -204,13 +204,13 @@ let peekinStrategy = {
 
 		if (count) {
 			if (count === 1) {
-				text += templates.user_name({nick: list[0]});
+				text += templates.user_name({nick: list[0], disconnected: true});
 			} else if (count > 1 && count <= maxnames) {
 				list.reverse();
 				let last = list.pop();
-				text += list.map(n => templates.user_name({nick: n}).trim()).join(", ") + " and " + templates.user_name({nick: last});
+				text += list.map(n => templates.user_name({nick: n, disconnected: true}).trim()).join(", ") + " and " + templates.user_name({nick: last, disconnected: true});
 			} else if (count > maxnames) {
-				text += list.map(n => templates.user_name({nick: n}).trim()).slice(0,maxnames).join(", ") + " and " + (count - maxnames) + " others";
+				text += list.map(n => templates.user_name({nick: n, disconnected: true}).trim()).slice(0,maxnames).join(", ") + " and " + (count - maxnames) + " others";
 			}
 			text += " peeked in";
 		}

@@ -1,6 +1,6 @@
 {{> ../user_name nick=from}}
 has kicked
-{{> ../user_name nick=target mode=""}}
+{{> ../user_name nick=target mode="" disconnected=""}}
 {{#if text}}
 	<i class="part-reason">({{{parse text}}})</i>
 {{/if}}
