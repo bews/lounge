@@ -392,7 +392,7 @@ Client.prototype.more = function(data) {
 	});
 	var messages = chan.messages.slice(Math.max(0, index - 100), index);
 	client.emit("more", {
-		chan: chan.id,
+		id: chan.id,
 		messages: messages
 	});
 };
