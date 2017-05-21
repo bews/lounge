@@ -119,6 +119,13 @@ module.exports = function(irc, network) {
 		}), true);
 	});
 
+	irc.on("debug", function(msg) {
+		network.channels[0].pushMessage(client, new Msg({
+			from: "DEBUG",
+			text: msg
+		}), true);
+	});
+
 	irc.on("server options", function(data) {
 		if (network.serverOptions.PREFIX === data.options.PREFIX && network.serverOptions.NETWORK === data.options.NETWORK) {
 			return;
