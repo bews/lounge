@@ -459,7 +459,7 @@ $(function() {
 
 	function renderChannelMessages(data) {
 		var documentFragment = buildChannelMessages(data);
-		var channel = chat.find("#chan-" + data.id + " .messages").append(documentFragment);
+		var channel = chat.find("#chan-" + data.id + " .messages").html(documentFragment);
 
 		if (data.firstUnread > 0) {
 			var first = channel.find("#msg-" + data.firstUnread);
