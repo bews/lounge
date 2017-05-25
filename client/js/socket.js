@@ -19,8 +19,9 @@ const socket = io({
 ].forEach(function(e) {
 	socket.on(e, function(data) {
 		$("#loading-page-message").text("Connection failed: " + data);
-		$("#connection-error").addClass("display");
-		$("#input").attr("disabled", "disabled");
+		$("#connection-error").addClass("shown");
+		$("#submit").attr("disabled", "disabled");
+		$("#input").data("disabled", true);
 
 		console.error(data);
 	});
