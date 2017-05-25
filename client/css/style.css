@@ -2064,6 +2064,10 @@ kbd {
 	#chat .msg.condensed > .time {
 		display: none;
 	}
+
+	#connection-error {
+		font-size: 5vw;
+	}
 }
 
 .fullscreen {
