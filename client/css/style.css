@@ -1485,11 +1485,8 @@ kbd {
 }
 
 #connection-error {
-	display: none;
-}
-
-#connection-error.shown {
-	display: block;
+	color: #fff;
+	font-size: 20px;
 }
 
 [contenteditable]:focus {

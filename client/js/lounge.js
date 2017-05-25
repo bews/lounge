@@ -223,6 +223,32 @@ $(function() {
 	});
 
 	socket.on("init", function(data) {
+		if (!$("#loading").length) {
+			var channels = $.map(data.networks, function(n) {
+				return n.channels;
+			});
+
+			channels.forEach(function(channel) {
+				renderChannel(channel);
+				if (channel.unread > 0 && channel.type === "channel") {
+					var badge = sidebar.find(".chan[data-title='" + channel.name + "'] .badge");
+					badge.text(channel.unread);
+					if (channel.highlight) {
+						badge.addClass("highlight");
+					}
+				}
+			});
+
+			if (sidebar.find(".highlight").length) {
+				toggleNotificationMarkers(true);
+			}
+
+			$("#connection-error").removeClass("display");
+			$("#input").removeAttr("disabled");
+
+			return;
+		}
+
 		$("#loading-page-message").text("Rendering…");
 
 		if (data.networks.length === 0) {
