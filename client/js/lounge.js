@@ -240,7 +240,7 @@ $(function() {
 				toggleNotificationMarkers(true);
 			}
 
-			$("#connection-error").removeClass("display");
+			$("#connection-error").removeClass("shown");
 			$("#input").removeAttr("disabled");
 
 			return;
