@@ -1566,7 +1566,7 @@ kbd {
 	min-height: 18px; /* Required when computing input height at char deletion */
 	height: 18px;
 	max-height: 90px;
-	line-height: 1.5;
+	line-height: 1.4;
 	outline: none;
 	margin: 5px;
 	padding: 0;
