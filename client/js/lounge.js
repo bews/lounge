@@ -231,7 +231,7 @@ $(function() {
 			channels.forEach(function(channel) {
 				renderChannel(channel);
 				var badge = sidebar.find(".chan[data-title='" + channel.name + "'] .badge");
-				badge.text(channel.unread);
+				badge.text(channel.unread ? channel.unread : "");
 				if (channel.highlight) {
 					badge.addClass("highlight");
 				}
