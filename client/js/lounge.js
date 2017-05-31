@@ -223,32 +223,11 @@ $(function() {
 	});
 
 	socket.on("init", function(data) {
-		if (!$("#loading").length) {
-			var channels = $.map(data.networks, function(n) {
-				return n.channels;
-			});
+		const loaded = $("#loading").length === 0;
 
-			channels.forEach(function(channel) {
-				renderChannel(channel);
-				var badge = sidebar.find(".chan[data-title='" + channel.name + "'] .badge");
-				badge.text(channel.unread ? channel.unread : "");
-				if (channel.highlight) {
-					badge.addClass("highlight");
-				}
-			});
-
-			if (sidebar.find(".highlight").length) {
-				toggleNotificationMarkers(true);
-			}
-
-			$("#connection-error").removeClass("shown");
-			$("#submit").removeAttr("disabled");
-			$("#input").data("disabled", false);
-
-			return;
+		if (!loaded) {
+			$("#loading-page-message").text("Rendering…");
 		}
-
-		$("#loading-page-message").text("Rendering…");
 
 		if (data.networks.length === 0) {
 			$("#footer").find(".connect").trigger("click", {
@@ -258,15 +237,21 @@ $(function() {
 			renderNetworks(data);
 		}
 
-		if (data.token && $("#sign-in-remember").is(":checked")) {
-			storage.set("token", data.token);
+		if (loaded) {
+			$("#connection-error").removeClass("shown");
+			$("#submit").removeAttr("disabled");
+			$("#input").data("disabled", false);
 		} else {
-			storage.remove("token");
-		}
+			if (data.token && $("#sign-in-remember").is(":checked")) {
+				storage.set("token", data.token);
+			} else {
+				storage.remove("token");
+			}
 
-		$("body").removeClass("signed-out");
-		$("#loading").remove();
-		$("#sign-in").remove();
+			$("body").removeClass("signed-out");
+			$("#loading").remove();
+			$("#sign-in").remove();
+		}
 
 		var id = data.active;
 		var target = sidebar.find("[data-id='" + id + "']").trigger("click", {
@@ -543,16 +528,41 @@ $(function() {
 	}
 
 	function renderNetworks(data) {
+		const loaded = $("#loading").length === 0;
+		let channels = {};
+
+		if (loaded) {
+			let channelsNew = [];
+			let channelsCurrent = sidebar.find(".chan").map(function() {
+				return $(this).data("id");
+			}).get();
+
+			// reconnection, add only new channels
+			channels = $.map(data.networks, function(n) {
+				return $.map(n.channels, function(c) {
+					channelsNew.push(c.id);
+					return channelsCurrent.indexOf(c.id) > -1 ? null : c;
+				});
+			});
+
+			// remove old
+			let diff = channelsCurrent.filter(x => channelsNew.indexOf(x) < 0);
+			diff.forEach(function(id) {
+				sidebar.find(".chan[data-id='" + id + "'] .close").click();
+			});
+		} else {
+			channels = $.map(data.networks, function(n) {
+				return n.channels;
+			});
+		}
+
 		sidebar.find(".empty").hide();
-		sidebar.find(".networks").append(
+		sidebar.find(".networks").html(
 			templates.network({
 				networks: data.networks
 			})
 		);
 
-		var channels = $.map(data.networks, function(n) {
-			return n.channels;
-		});
 		chat.append(
 			templates.chat({
 				channels: channels
@@ -560,7 +570,10 @@ $(function() {
 		);
 		channels.forEach(renderChannel);
 
-		confirmExit();
+		if (!loaded) {
+			confirmExit();
+		}
+
 		sortable();
 
 		if (sidebar.find(".highlight").length) {
@@ -1418,6 +1431,10 @@ $(function() {
 
 	chat.on("click", ".show-more-button", function() {
 		var self = $(this);
+		if ($("#connection-error").is(".shown")) {
+			self.data("loading", true);
+			return;
+		}
 		var lastMessage = self.parent().next(".messages").children(".msg").first();
 		if (lastMessage.is(".condensed")) {
 			lastMessage = lastMessage.children(".msg").first();
