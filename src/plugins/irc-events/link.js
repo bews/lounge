@@ -58,6 +58,9 @@ function parse(msg, url, res, client) {
 			$("meta[property=\"og:image\"]").attr("content")
 			|| $("meta[name=\"twitter:image:src\"]").attr("content")
 			|| "";
+		if (Helper.config.prefetchForceSSL) {
+			toggle.thumb = toggle.thumb.replace(/^http:\/\//, "https://");
+		}
 		break;
 
 	case "image/png":
@@ -67,6 +70,9 @@ function parse(msg, url, res, client) {
 		if ((res.size === undefined && Helper.config.prefetchUndefinedImageSize) ||
 			(res.size < (Helper.config.prefetchMaxImageSize * 1024))) {
 			toggle.type = "image";
+			if (Helper.config.prefetchForceSSL) {
+				toggle.link = toggle.link.replace(/^http:\/\//, "https://");
+			}
 		} else {
 			return;
 		}
