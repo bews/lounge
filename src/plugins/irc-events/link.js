@@ -36,9 +36,6 @@ module.exports = function(client, chan, originalMsg) {
 };
 
 function parse(msg, url, res, res2, client) {
-	if (!res) {
-		return;
-	}
 	let uri = res.uri;
 	let toggle = msg.toggle = {
 		id: msg.id,
@@ -132,57 +129,53 @@ function fetch(url, cb) {
 			}
 		});
 	} catch (e) {
-		req = false;
 		cb(false);
+		return;
 	}
+	var length = 0;
+	var limit = 1024 * 10;
+	req
+		.on("response", function(res) {
+			if (!(/(text\/html|application\/json)/.test(res.headers["content-type"]))) {
+				res.req.abort();
+			}
+		})
+		.on("error", function() {})
+		.pipe(es.map(function(data, next) {
+			length += data.length;
+			if (length > limit) {
+				req.response.req.abort();
+			}
+			next(null, data);
+		}))
+		.pipe(es.wait(function(err, data) {
+			if (err) {
+				return;
+			}
 
-	if (req) {
-		var length = 0;
-		var limit = 1024 * 10;
-		req
-			.on("response", function(res) {
-				if (!(/(text\/html|application\/json)/.test(res.headers["content-type"]))) {
-					res.req.abort();
-				}
-			})
-			.on("error", function() {
-			})
-			.pipe(es.map(function(data, next) {
-				length += data.length;
-				if (length > limit) {
-					req.response.req.abort();
-				}
-				next(null, data);
-			}))
-			.pipe(es.wait(function(err, data) {
-				if (err) {
-					return;
-				}
-
-				var body;
-				var type;
-				var size = req.response.headers["content-length"];
-				var uri = req.response.request.uri;
-				try {
-					body = JSON.parse(data);
-				} catch (e) {
-					body = {};
-				}
-				try {
-					type = req.response.headers["content-type"].split(/ *; */).shift();
-				} catch (e) {
-					type = {};
-				}
-				data = {
-					uri: uri.href,
-					text: data,
-					body: body,
-					type: type,
-					size: size
-				};
-				cb(data);
-			}));
-	}
+			var body;
+			var type;
+			var size = req.response.headers["content-length"];
+			var uri = req.response.request.uri;
+			try {
+				body = JSON.parse(data);
+			} catch (e) {
+				body = {};
+			}
+			try {
+				type = req.response.headers["content-type"].split(/ *; */).shift();
+			} catch (e) {
+				type = {};
+			}
+			data = {
+				uri: uri.href,
+				text: data,
+				body: body,
+				type: type,
+				size: size
+			};
+			cb(data);
+		}));
 }
 
 // https://github.com/request/request/issues/2120
