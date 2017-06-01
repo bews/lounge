@@ -283,7 +283,7 @@ let nickStrategy = {
 			let msg = {};
 			while ((msg = list.pop()) !== undefined) {
 				text += text === "" ? "" : " | ";
-				text += templates.user_name({nick: msg.from}) + " changed name to " + templates.user_name({nick: msg.new_nick});
+				text += templates.user_name({nick: msg.from, disconnected: true}) + " changed name to " + templates.user_name({nick: msg.new_nick});
 			}
 		}
 		return text;
