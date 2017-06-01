@@ -237,12 +237,13 @@ $(function() {
 				pushState: false,
 			});
 		} else {
-			renderNetworks(data);
+			renderNetworks(data, false);
 		}
 
 		if (loaded) {
 			$("#connection-error").removeClass("shown");
-			$("#submit").removeAttr("disabled");
+			$("#submit").prop("disabled", false);
+			$(".show-more-button").prop("disabled", false);
 			$("#input").data("disabled", false);
 		} else {
 			if (data.token && $("#sign-in-remember").is(":checked")) {
@@ -536,7 +537,7 @@ $(function() {
 		}
 	}
 
-	function renderNetworks(data) {
+	function renderNetworks(data, append) {
 		const loaded = $("#loading").length === 0;
 		let channels = {};
 
@@ -555,22 +556,28 @@ $(function() {
 			});
 
 			// remove old
-			let diff = channelsCurrent.filter(x => channelsNew.indexOf(x) < 0);
-			diff.forEach(function(id) {
-				sidebar.find(".chan[data-id='" + id + "'] .close").click();
-			});
+			if (!append) {
+				let diff = channelsCurrent.filter(x => channelsNew.indexOf(x) < 0);
+				diff.forEach(function(id) {
+					chat.find(".chan[data-id='" + id + "']").remove();
+				});
+			}
 		} else {
 			channels = $.map(data.networks, function(n) {
 				return n.channels;
 			});
+			sidebar.find(".empty").hide();
 		}
 
-		sidebar.find(".empty").hide();
-		sidebar.find(".networks").html(
-			templates.network({
-				networks: data.networks
-			})
-		);
+		let renderedNetworks = templates.network({
+			networks: data.networks
+		});
+
+		if (append) {
+			sidebar.find(".networks").append(renderedNetworks);
+		} else {
+			sidebar.find(".networks").html(renderedNetworks);
+		}
 
 		chat.append(
 			templates.chat({
@@ -730,7 +737,7 @@ $(function() {
 	});
 
 	socket.on("network", function(data) {
-		renderNetworks(data);
+		renderNetworks(data, true);
 
 		sidebar.find(".chan")
 			.last()
@@ -1440,10 +1447,6 @@ $(function() {
 
 	chat.on("click", ".show-more-button", function() {
 		var self = $(this);
-		if ($("#connection-error").is(".shown")) {
-			self.data("loading", true);
-			return;
-		}
 		var lastMessage = self.parent().next(".messages").children(".msg").first();
 		if (lastMessage.is(".condensed")) {
 			lastMessage = lastMessage.children(".msg").first();
