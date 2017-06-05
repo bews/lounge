@@ -1,10 +1,9 @@
 "use strict";
 const $ = require("jquery");
-const moment = require("moment");
 const settings = $("#settings");
 const userStyles = $("#user-specified-css");
 const storage = require("./localStorage");
-const constants = require("./constants");
+const tz = require("./libs/handlebars/tz");
 
 const windows = $("#windows");
 const chat = $("#chat");
@@ -84,9 +83,8 @@ settings.on("change", "input, select, textarea", function() {
 			return h !== "";
 		});
 	} else if (name === "showSeconds") {
-		var format = options.showSeconds ? constants.timeFormats.msgWithSeconds : constants.timeFormats.msgDefault;
 		chat.find(".msg > .time").each(function() {
-			$(this).text(moment($(this).parent().data("time")).format(format));
+			$(this).text(tz($(this).parent().data("time")));
 		});
 	}
 }).find("input")
