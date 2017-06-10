@@ -16,6 +16,6 @@ setTimeout(function() {
 	}
 }, 5000);
 
-document.getElementById("loading-slow-reload").onclick = function() {
+document.getElementById("loading-slow-reload").addEventListener("click", function() {
 	location.reload();
-};
+});
