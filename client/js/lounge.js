@@ -454,11 +454,14 @@ $(function() {
 	}
 
 	function renderChannelMessages(data) {
-		var documentFragment = buildChannelMessages(data);
-		var channel = chat.find("#chan-" + data.id + " .messages").html(documentFragment);
+		let documentFragment = buildChannelMessages(data);
+		let channel = chat.find("#chan-" + data.id + " .messages").html(documentFragment);
+		let more = chat.find("#chan-" + data.id + " .show-more");
+
+		more.toggleClass("show", (data.messages.length === 100));
 
 		if (data.firstUnread > 0) {
-			var first = channel.find("#msg-" + data.firstUnread);
+			let first = channel.find("#msg-" + data.firstUnread);
 
 			// TODO: If the message is far off in the history, we still need to append the marker into DOM
 			if (!first.length) {
