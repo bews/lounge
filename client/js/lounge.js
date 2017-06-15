@@ -622,6 +622,7 @@ $(function() {
 			channel.find(".msg .user[data-name='" + message.from + "']").removeClass("disconnected");
 			break;
 		case "part":
+			// Deliberate fall through
 		case "quit":
 			channel.find(".msg .user[data-name='" + message.from + "']").addClass("disconnected");
 			break;
@@ -846,10 +847,12 @@ $(function() {
 		renderChannelUsers(data);
 
 		// Condensed actions support
-		var messages = chat.find("#chan-" + data.id).find(".messages");
-		data.users.forEach(function(user) {
-			messages.find(".user[data-name='" + user.name + "']").removeClass("disconnected");
-		});
+		setTimeout(function() {
+			let messages = chat.find("#chan-" + data.id).find(".messages");
+			data.users.forEach(function(user) {
+				messages.find(".user[data-name='" + user.name + "']").removeClass("disconnected");
+			});
+		}, 500);
 	});
 
 	var options = require("./options");
