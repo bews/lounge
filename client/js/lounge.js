@@ -323,7 +323,7 @@ $(function() {
 			"whois",
 			"ctcp",
 			"channel_list",
-			"ban_list"
+			"ban_list",
 		].indexOf(type) !== -1) {
 			template = "msg_action";
 		} else if (type === "unhandled") {
@@ -342,7 +342,8 @@ $(function() {
 			if (nicks) {
 				nicks.forEach(function(nick) {
 					if (data.msg.text.indexOf(nick) > -1) {
-						var re = new RegExp("(^| |&lt;|@|\\*)" + nick.replace(/\[/, "\\[").replace(/]/, "\\]") + "(\\.| |,|:|&gt;|\\?|\\*|$)", "g");
+						let nick_re = nick.replace(/\[/g, "\\[").replace(/]/g, "\\]").replace(/\|/g, "\\|"); // makes the following a valid regex
+						let re = new RegExp("(^| |&lt;|@|\\*)" + nick_re + "(\\.| |,|:|&gt;|\\?|\\*|$)", "g");
 						text.html(text.html().replace(re, "$1" + templates.user_name({nick: nick}).trim() + "$2"));
 					}
 				});

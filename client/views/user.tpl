@@ -6,6 +6,6 @@
 	{{/unless}}
 	<div class="user-mode {{modes mode}}">
 	{{/diff}}
-  {{> user_name}}
+	{{> user_name}}
 {{/each}}
 </div>
