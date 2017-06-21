@@ -55,7 +55,7 @@ $(function() {
 		id: "emoji",
 		match: /\B:([-+\w]*):?$/,
 		search(term, callback) {
-			callback(Object.keys(emojiMap).filter(name => name.indexOf(term) === 0));
+			callback(Object.keys(emojiMap).filter((name) => name.indexOf(term) === 0));
 		},
 		template(value) {
 			return `<span class="emoji">${emojiMap[value]}</span> ${value}`;
@@ -72,7 +72,7 @@ $(function() {
 		search(term, callback) {
 			term = term.slice(1);
 			if (term[0] === "@") {
-				callback(completeNicks(term.slice(1)).map(val => "@" + val));
+				callback(completeNicks(term.slice(1)).map((val) => "@" + val));
 			} else {
 				callback(completeNicks(term));
 			}
@@ -122,7 +122,7 @@ $(function() {
 		search(term, callback) {
 			term = term.toLowerCase();
 			const matchingColorCodes = constants.colorCodeMap
-				.filter(i => i[0].startsWith(term) || i[1].toLowerCase().startsWith(term));
+				.filter((i) => i[0].startsWith(term) || i[1].toLowerCase().startsWith(term));
 
 			callback(matchingColorCodes);
 		},
@@ -141,8 +141,8 @@ $(function() {
 		search(term, callback, match) {
 			term = term.toLowerCase();
 			const matchingColorCodes = constants.colorCodeMap
-				.filter(i => i[0].startsWith(term) || i[1].toLowerCase().startsWith(term))
-				.map(pair => pair.concat(match[1])); // Needed to pass fg color to `template`...
+				.filter((i) => i[0].startsWith(term) || i[1].toLowerCase().startsWith(term))
+				.map((pair) => pair.concat(match[1])); // Needed to pass fg color to `template`...
 
 			callback(matchingColorCodes);
 		},
@@ -675,7 +675,11 @@ $(function() {
 			data
 		]);
 
-		if (data.msg.self || stopUnreadMarker) {
+		var lastVisible = container.find("div:visible").last();
+		if (data.msg.self || stopUnreadMarker
+			|| lastVisible.hasClass("unread-marker")
+			|| (lastVisible.hasClass("date-marker")
+				&& lastVisible.prev().hasClass("unread-marker"))) {
 			container
 				.find(".unread-marker")
 				.appendTo(container);
@@ -1380,7 +1384,7 @@ $(function() {
 		const fuzzyOptions = {
 			pre: "<b>",
 			post: "</b>",
-			extract: el => $(el).text()
+			extract: (el) => $(el).text()
 		};
 
 		const result = fuzzy.filter(
@@ -1591,14 +1595,13 @@ $(function() {
 			"pagedown"
 		], function(e, key) {
 			let container = windows.find(".window.active");
-			if (container.is(":animated")) {
-				return;
-			}
 
 			// Chat windows scroll message container
 			if (container.attr("id") === "chat-container") {
 				container = container.find(".chan.active .chat");
 			}
+
+			container.finish();
 
 			const offset = container.get(0).clientHeight * 0.9;
 			let scrollTop = container.scrollTop();
@@ -1609,7 +1612,7 @@ $(function() {
 				scrollTop = Math.ceil(scrollTop + offset);
 			}
 
-			container.stop().animate({
+			container.animate({
 				scrollTop: scrollTop
 			}, 200);
 
@@ -1726,7 +1729,7 @@ $(function() {
 
 		return $.grep(
 			words,
-			w => !w.toLowerCase().indexOf(word.toLowerCase())
+			(w) => !w.toLowerCase().indexOf(word.toLowerCase())
 		);
 	}
 
@@ -1735,7 +1738,7 @@ $(function() {
 
 		return $.grep(
 			words,
-			w => !w.toLowerCase().indexOf(word.toLowerCase())
+			(w) => !w.toLowerCase().indexOf(word.toLowerCase())
 		);
 	}
 
@@ -1752,7 +1755,7 @@ $(function() {
 
 		return $.grep(
 			words,
-			w => !w.toLowerCase().indexOf(word.toLowerCase())
+			(w) => !w.toLowerCase().indexOf(word.toLowerCase())
 		);
 	}
 
@@ -1916,19 +1919,17 @@ $(function() {
 	// Only start opening socket.io connection after all events have been registered
 	socket.open();
 
-	window.addEventListener(
-		"popstate",
-		(e) => {
-			const {state} = e;
-			if (!state) {
-				return;
-			}
-			const {clickTarget} = state;
-			if (clickTarget) {
-				$(clickTarget).trigger("click", {
-					pushState: false
-				});
-			}
+	window.addEventListener("popstate", (e) => {
+		const {state} = e;
+		if (!state) {
+			return;
 		}
-	);
+
+		const {clickTarget} = state;
+		if (clickTarget) {
+			$(clickTarget).trigger("click", {
+				pushState: false
+			});
+		}
+	});
 });

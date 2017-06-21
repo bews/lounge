@@ -40,6 +40,12 @@ body {
 	font: 16px Lato, sans-serif;
 	margin: 0;
 
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	cursor: default;
+
 	/**
 	  * Disable pull-to-refresh on mobile that conflicts with scrolling the message list.
 	  * See http://stackoverflow.com/a/29313685/1935861
@@ -140,10 +146,6 @@ kbd {
 .container {
 	margin: 80px auto;
 	max-width: 480px;
-	overflow: hidden;
-	overflow-y: auto;
-	-webkit-overflow-scrolling: touch;
-	padding: 0 30px;
 }
 
 ::-moz-placeholder {
@@ -157,6 +159,17 @@ kbd {
 
 :-ms-input-placeholder {
 	color: rgba(0, 0, 0, .35) !important;
+}
+
+#help,
+#windows .header .title,
+#windows .header .topic,
+#chat .messages {
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+	user-select: text;
+	cursor: text;
 }
 
 /* Icons */
@@ -393,8 +406,7 @@ kbd {
 }
 
 #viewport.rt #chat .sidebar {
-	-webkit-transform: translate3d(180px, 0, 0);
-	transform: translate3d(180px, 0, 0);
+	right: -180px;
 }
 
 #sidebar {
@@ -406,6 +418,10 @@ kbd {
 	position: absolute;
 	top: 0;
 	width: 220px;
+}
+
+#viewport.menu-open #sidebar {
+	will-change: transform;
 }
 
 #sidebar button,
@@ -569,14 +585,6 @@ kbd {
 #sidebar .tse-scrollbar {
 	top: 2px;
 	right: 3px;
-}
-
-#sidebar,
-#footer {
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
 }
 
 #footer {
@@ -804,6 +812,7 @@ kbd {
 	left: 0;
 	right: 0;
 	overflow: auto;
+	will-change: transform, scroll-position;
 	-webkit-overflow-scrolling: touch;
 	position: absolute;
 }
@@ -827,9 +836,7 @@ kbd {
 	position: absolute;
 	right: 0;
 	width: 180px;
-	transition: all .4s;
-	-webkit-transform: translateZ(0);
-	transform: translateZ(0);
+	transition: right .4s;
 }
 
 #chat .show-more {
@@ -1278,6 +1285,7 @@ kbd {
 	bottom: 0;
 	overflow: auto;
 	overflow-x: hidden;
+	will-change: transform, scroll-position;
 	-webkit-overflow-scrolling: touch;
 	padding-bottom: 10px;
 	position: absolute;
@@ -1518,10 +1526,6 @@ kbd {
 	padding-left: 9px;
 	padding-right: 5px;
 	border-radius: 2px;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
 	-webkit-flex: 0 0 auto;
 	flex: 0 0 auto;
 	border: 1px solid transparent;
@@ -1967,11 +1971,6 @@ kbd {
 		margin-top: 60px !important;
 	}
 
-	#viewport.rt #chat .sidebar {
-		-webkit-transform: translate3d(-180px, 0, 0);
-		transform: translate3d(-180px, 0, 0);
-	}
-
 	#sidebar,
 	#footer {
 		left: -220px;
@@ -2006,6 +2005,10 @@ kbd {
 		right: -180px;
 	}
 
+	#viewport.rt #chat .sidebar {
+		right: 0;
+	}
+
 	#chat .title:before {
 		display: none;
 	}
@@ -2016,12 +2019,6 @@ kbd {
 	.messages .msg,
 	.sidebar {
 		font-size: 14px;
-	}
-}
-
-@media (min-width: 769px) {
-	#viewport.menu-open {
-		transition: none;
 	}
 }
 
