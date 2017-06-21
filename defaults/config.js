@@ -78,14 +78,6 @@ module.exports = {
 	prefetchMaxImageSize: 512,
 
 	//
-	// Display images with unknown size in prefetch.
-	//
-	// @type     boolean
-	// @default  false
-	//
-	prefetchUndefinedImageSize: false,
-
-	//
 	// Always rewrite http to https
 	//
 	// @type     boolean

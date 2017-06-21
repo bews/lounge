@@ -103,7 +103,7 @@ function checkImage(res) {
 		case "image/gif":
 		case "image/jpg":
 		case "image/jpeg":
-			if ((res.size === undefined && Helper.config.prefetchUndefinedImageSize) || (res.size < (Helper.config.prefetchMaxImageSize * 1024))) {
+			if (res.size < (Helper.config.prefetchMaxImageSize * 1024)) {
 				if (Helper.config.prefetchForceSSL) {
 					uri = res.uri.replace(/^http:\/\//, "https://");
 				} else {
