@@ -479,6 +479,7 @@ $(function() {
 			break;
 		case "part":
 			// Deliberate fall through
+		case "kick":
 		case "quit":
 			channel.find(".msg .user[data-name='" + message.from + "']").addClass("disconnected");
 			break;
