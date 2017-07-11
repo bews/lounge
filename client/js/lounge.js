@@ -716,14 +716,14 @@ $(function() {
 
 		// restore scroll position
 		var position = chan.height() - heightOld;
-		scrollable.scrollTop(position);
+		scrollable.stop(true, false).scrollTop(position);
 
 		if (data.messages.length !== 100) {
 			scrollable.find(".show-more").removeClass("show");
 		}
 
 		// Date change detect
-		// Have to use data instaid of the documentFragment because it's being weird
+		// Have to use data instead of the documentFragment because it's being weird
 		var lastDate;
 		var nicks = chat.find("#chan-" + data.id + " .users").data("nicks");
 		$(data.messages).each(function() {
