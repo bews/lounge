@@ -616,19 +616,19 @@ $(function() {
 	function updateDisconnectedUsers(channel, message) {
 		switch (message.type) {
 		case "nick":
-			channel.find(".msg .user[data-name='" + message.from.replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "']").addClass("disconnected");
-			channel.find(".msg .user[data-name='" + message.new_nick.replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "']").removeClass("disconnected");
+			channel.find(".msg .user[data-name='" + message.from.replace(/\\/g, "\\\\") + "']").addClass("disconnected");
+			channel.find(".msg .user[data-name='" + message.new_nick.replace(/\\/g, "\\\\") + "']").removeClass("disconnected");
 			break;
 		case "join":
-			channel.find(".msg .user[data-name='" + message.from.replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "']").removeClass("disconnected");
+			channel.find(".msg .user[data-name='" + message.from.replace(/\\/g, "\\\\") + "']").removeClass("disconnected");
 			break;
 		case "part":
 			// Deliberate fall through
 		case "quit":
-			channel.find(".msg .user[data-name='" + message.from.replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "']").addClass("disconnected");
+			channel.find(".msg .user[data-name='" + message.from.replace(/\\/g, "\\\\") + "']").addClass("disconnected");
 			break;
 		case "kick":
-			channel.find(".msg .user[data-name='" + message.target.replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "']").addClass("disconnected");
+			channel.find(".msg .user[data-name='" + message.target.replace(/\\/g, "\\\\") + "']").addClass("disconnected");
 			break;
 		}
 	}
