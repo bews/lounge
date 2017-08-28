@@ -13,11 +13,15 @@ body { background: #4d5250; }
 #chat .self .text { color: #222; }
 #chat .time { color: #ccc !important; }
 
+#sidebar .chan:first-child { color: #4fe5ff; }
+#sidebar .chan:first-child:hover,
+#sidebar .chan:first-child.active { color: #fff; }
+
 #chat .chat,
 #chat .sidebar { top: 48px !important; }
-#chat .msg { border-top: 1px dotted #e5e5e5; }
-#chat .msg.self + .msg { border-top: 1px dotted rgb(17, 204, 186); }
-#chat .msg.highlight + .msg { border-top: 1px dotted rgb(255, 100, 100); }
+#chat .msg { border-top: 1px solid #f6f6f6; }
+#chat .msg.self + .msg { border-top: 1px solid rgb(104, 222, 211); }
+#chat .msg.highlight + .msg { border-top: 1px solid rgb(255,120,120); }
 
 #chat .msg.self + #chat .msg,
 #chat .date-marker + .msg,
