@@ -8,10 +8,10 @@ Author: Bews
 GitHub: https://github.com/bews/lounge-light
 */
 
-body { background: rgb(64, 69, 64); }
+body { background: rgb(68, 72, 68); }
 
 #sidebar .chan .name:after {
-	background: linear-gradient(to right, rgba(64, 69, 64, 0) 0%, rgba(64, 69, 64, 1) 100%);
+	background: linear-gradient(to right, rgba(68, 72, 68, 0) 0%, rgba(68, 72, 68, 1) 100%);
 }
 
 #chat .self .text { color: #222; }
