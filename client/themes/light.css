@@ -90,3 +90,7 @@ body { background: #424248; }
 #chat.colored-nicks .user.color-30 { color: #cc0; }
 #chat.colored-nicks .user.color-31 { color: #c80; }
 #chat.colored-nicks .user.color-32 { color: #ff8000; }
+
+#chat .user.disconnected, #chat.colored-nicks .user.disconnected {
+	color: #999;
+}
